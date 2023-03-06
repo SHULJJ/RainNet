@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import functools
 from torch.optim import lr_scheduler
 from models.normalize import RAIN
+from models.normalize import ForeRAIN
 from torch.nn.utils import spectral_norm
 
 class Identity(nn.Module):
@@ -28,7 +29,7 @@ def get_norm_layer(norm_type='instance'):
     elif norm_type == 'none':
         norm_layer = lambda x: Identity()
     elif norm_type.startswith('rain'):
-        norm_layer = RAIN
+        norm_layer = ForeRAIN
     else:
         raise NotImplementedError('normalization layer [%s] is not found' % norm_type)
     return norm_layer
@@ -280,7 +281,7 @@ def get_act_dconv(act, dims_in, dims_out, kernel, stride, padding, bias):
     return nn.Sequential(*conv)
 
 class RainNet(nn.Module):
-    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=RAIN, 
+    def __init__(self, input_nc, output_nc, ngf=64, norm_layer=ForeRAIN, 
                  norm_type_indicator=[0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1],
                  use_dropout=False, use_attention=True):
         super(RainNet, self).__init__()
@@ -364,7 +365,7 @@ class RainNet(nn.Module):
 
         ox0 = self.model_layer13(ox1)
         if self.model_layer13norm._get_name() in self.norm_namebuffer:
-            ox0 = self.model_layer13norm(ox0, mask)
+            ox0 = self.model_layer13norm(x0,ox0, mask)
         else:
             ox0 = self.model_layer13norm(ox0)
         ox0 = torch.cat([x0, ox0], 1)
@@ -388,7 +389,7 @@ class UnetBlockCodec(nn.Module):
         |-- downsampling -- |submodule| -- upsampling --|
     """
     def __init__(self, outer_nc, inner_nc, input_nc=None, submodule=None, outermost=False, innermost=False,
-                 norm_layer=RAIN, use_dropout=False, use_attention=False, enc=True, dec=True):
+                 norm_layer=ForeRAIN, use_dropout=False, use_attention=False, enc=True, dec=True):
         """Construct a Unet submodule with skip connections.
 
         Parameters:

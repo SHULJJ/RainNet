@@ -4,7 +4,7 @@ from torch.nn import init
 import torch.nn.functional as F
 import functools
 from torch.optim import lr_scheduler
-from models.normalize import RAIN
+# from models.normalize import RAIN
 from models.normalize import ForeRAIN
 from torch.nn.utils import spectral_norm
 
@@ -286,7 +286,7 @@ class RainNet(nn.Module):
                  use_dropout=False, use_attention=True):
         super(RainNet, self).__init__()
         self.input_nc = input_nc
-        self.norm_namebuffer = ['RAIN']
+        self.norm_namebuffer = ['ForeRAIN']
         self.use_dropout = use_dropout
         self.use_attention = use_attention
         norm_type_list = [get_norm_layer('instance'), norm_layer]
@@ -347,7 +347,7 @@ class RainNet(nn.Module):
         ox3 = self.unet_block(x3, mask)
         ox2 = self.model_layer11(ox3)
         if self.model_layer11norm._get_name() in self.norm_namebuffer:
-            ox2 = self.model_layer11norm(ox2, mask)
+            ox2 = self.model_layer11norm(x2,ox2, mask)
         else:
             ox2 = self.model_layer11norm(ox2)
         ox2 = torch.cat([x2, ox2], 1)
@@ -356,7 +356,7 @@ class RainNet(nn.Module):
 
         ox1 = self.model_layer12(ox2)
         if self.model_layer12norm._get_name() in self.norm_namebuffer:
-            ox1 = self.model_layer12norm(ox1, mask)
+            ox1 = self.model_layer12norm(x1,ox1, mask)
         else:
             ox1 = self.model_layer12norm(ox1)
         ox1 = torch.cat([x1, ox1], 1)
@@ -458,9 +458,10 @@ class UnetBlockCodec(nn.Module):
         elif self.innermost:
             ret = self.up(x)
             if self.upnorm._get_name() in self.norm_namebuffer:
-                ret = self.upnorm(ret, mask)
+                ret = self.upnorm(x,ret, mask)
             else:
-                ret = self.upnorm(ret)
+                # ret = self.upnorm(ret)
+                ret = self.upnorm(x,ret, mask)
             ret = torch.cat([x, ret], 1)
             if self.use_attention:
                 return self.attention(ret) * ret
@@ -474,9 +475,9 @@ class UnetBlockCodec(nn.Module):
             ret = self.submodule(ret, mask)
             ret = self.up(ret)
             if self.upnorm._get_name() in self.norm_namebuffer:
-                ret = self.upnorm(ret, mask)
+                ret = self.upnorm(x,ret, mask)
             else:
-                ret = self.upnorm(ret)
+                ret = self.upnorm(x,ret, mask)
             if self.use_dropout:    # only works for middle features
                 ret = self.dropout(ret)
             ret = torch.cat([x, ret], 1)

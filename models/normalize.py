@@ -18,7 +18,7 @@ class ForeRAIN(nn.Module):
     def forward(self,x_back, x, mask):
         mask = F.interpolate(mask.detach(), size=x.size()[2:], mode='nearest')
         mean_back, std_back = self.get_foreground_mean_std(x_back * (1-mask), 1 - mask) # the background features
-        normalized = (x - mean_back) / std_back
+        normalized = (x_back - mean_back) / std_back
         normalized_background = (normalized * (1 + self.background_gamma[None, :, None, None]) +
                                  self.background_beta[None, :, None, None]) * (1 - mask)
 

@@ -1,0 +1,35 @@
+{
+
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Python: 当前文件",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args":[
+                "--dataset_root" , "dataset",
+                "--name" ,"experiment_train1" ,
+                "--model", "rainnet", 
+                "--netG" ,"rainnet", 
+                "--dataset_mode", "iharmony4", 
+                "--is_train" ,"1", 
+                "--gan_mode","wgangp", 
+                "--normD" ,"instance", 
+                "--normG" ,"RAIN" ,
+                "--preprocess" ,"none" ,
+                "--niter", "100" ,
+                "--niter_decay", "100", 
+                "--input_nc", "3", 
+                "--batch_size", "2", 
+                "--num_threads", "6", 
+                "--lambda_L1", "100" ,
+                "--print_freq", "400", 
+                "--gpu_ids", "0" 
+            ],
+            "justMyCode": true
+        }
+    ]
+}

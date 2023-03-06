@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 python train.py \
---dataset_root ../dataset/iHarmony4/ \
---name experiment_train \
+--dataset_root ./dataset \
+--name forerain \
 --model rainnet \
 --netG rainnet \
 --dataset_mode iharmony4 \
@@ -13,8 +13,8 @@ python train.py \
 --niter 100 \
 --niter_decay 100 \
 --input_nc 3 \
---batch_size 11 \
---num_threads 6 \
+--batch_size 12 \
+--num_threads 12 \
 --lambda_L1 100 \
 --print_freq 400 \
 --gpu_ids 0 \
